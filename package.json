@@ -1,0 +1,12 @@
+{
+  "name": "aispecialist-experience-frontend-reskill",
+  "version": "1.0.0",
+  "description": "AI Specialist Frontend reskill project",
+  "main": "App.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Priti Dixit",
+  "license": "ISC"
+}
