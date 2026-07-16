@@ -2,11 +2,23 @@
   "name": "aispecialist-experience-frontend-reskill",
   "version": "1.0.0",
   "description": "AI Specialist Frontend reskill project",
-  "main": "App.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
   },
   "keywords": [],
   "author": "Priti Dixit",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "parcel": "^2.16.4"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.4",
+    "@tailwindcss/postcss": "^4.3.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.2"
+  }
 }
