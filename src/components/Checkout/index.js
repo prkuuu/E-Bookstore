@@ -1,161 +1,129 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
-import { placeOrder } from "../../services/orderService";
 
-const TAX_RATE      = 0.12; // 12%
-const GIFT_POINTS_VALUE = 1; // 1 point = ₹1
+const TAX_RATE = 0.12;
 
 const inputClass =
-  "w-full bg-[#1f1f1f] border border-[#3a3a3a] rounded-md px-3 py-2 text-[13px] text-gray-200 placeholder:text-gray-500 outline-none focus:border-[#555] transition-colors";
+  "w-full bg-[#1c1c1c] border border-[#3a3a3a] rounded-md px-3 py-2 text-[13px] text-gray-200 placeholder:text-gray-500 outline-none focus:border-[#555] transition-colors";
 
 const selectClass =
-  "w-full bg-[#1f1f1f] border border-[#3a3a3a] rounded-md px-3 py-2 text-[13px] text-gray-200 outline-none focus:border-[#555] transition-colors appearance-none cursor-pointer";
+  "w-full bg-[#1c1c1c] border border-[#3a3a3a] rounded-md px-3 py-2 text-[13px] text-gray-200 outline-none focus:border-[#555] transition-colors cursor-pointer";
 
-/* ── Cart Item Row ── */
+/* ── Cart Item Card ── */
 const CartItem = ({ item, onRemove, onQty }) => {
   const { book, qty } = item;
   return (
-    <div className="flex gap-4 bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg p-4 items-start">
+    <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-xl p-4 flex gap-4 items-start">
       {/* Cover */}
       <div
-        className="w-16 h-22 rounded shrink-0 flex items-center justify-center text-[13px] font-bold tracking-wider text-white/85"
+        className="w-[120px] h-[168px] rounded-lg shrink-0 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: book.cover }}
       >
-        {book.initials}
+        <span className="text-[18px] font-black tracking-widest text-white/90 text-center px-2 leading-tight">
+          {book.initials}
+        </span>
       </div>
 
       {/* Info */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
-        <h3 className="text-[14px] font-semibold text-gray-100 truncate">{book.title}</h3>
-        <p className="text-[12px] text-gray-400">by <span className="text-blue-400">{book.author}</span></p>
-        <p className="text-[11px] text-gray-500">{book.format}</p>
-        <p className="text-[11px] text-gray-500">Delivery by <strong className="text-gray-400">{book.delivery}</strong></p>
-        <p className="text-[14px] font-bold text-gray-100 mt-1">&#8377;{(book.price * qty).toLocaleString("en-IN")}</p>
-      </div>
+        <h3 className="text-[15px] font-semibold text-gray-100">{book.title}</h3>
+        <p className="text-[13px] text-gray-400">
+          by <span className="text-blue-400 cursor-pointer hover:underline">{book.author}</span>
+        </p>
+        {book.description && (
+          <p className="text-[12px] text-gray-500 mt-0.5 line-clamp-2">{book.description}</p>
+        )}
+        <p className="text-[12px] text-gray-400 mt-1">{book.format}</p>
+        {book.tags?.length > 0 && (
+          <p className="text-[12px] mt-0.5">
+            {book.tags.map((t, i) => (
+              <span key={t}>
+                <span className="text-blue-400 cursor-pointer hover:underline">{t}</span>
+                {i < book.tags.length - 1 && <span className="text-gray-600">, </span>}
+              </span>
+            ))}
+          </p>
+        )}
+        <p className="text-[15px] font-bold text-gray-100 mt-2">&#8377;{book.price}</p>
+        <p className="text-[12px] text-gray-500">
+          Delivery by <strong className="text-gray-400">{book.delivery}</strong>
+        </p>
 
-      {/* Qty + Remove */}
-      <div className="flex flex-col items-end gap-3 shrink-0">
-        <button
-          onClick={() => onRemove(book.id)}
-          className="text-[11px] text-red-400 bg-transparent border-none cursor-pointer hover:text-red-300 p-0"
-        >
-          Remove
-        </button>
-        <div className="flex items-center gap-2 bg-[#262626] border border-[#3a3a3a] rounded-md px-2 py-1">
-          <button
-            onClick={() => onQty(book.id, qty - 1)}
-            disabled={qty <= 1}
-            className="text-gray-300 bg-transparent border-none cursor-pointer text-[16px] leading-none disabled:opacity-30 hover:text-white px-1"
-          >−</button>
-          <span className="text-[13px] text-gray-200 min-w-[18px] text-center">{qty}</span>
-          <button
-            onClick={() => onQty(book.id, qty + 1)}
-            className="text-gray-300 bg-transparent border-none cursor-pointer text-[16px] leading-none hover:text-white px-1"
-          >+</button>
+        {/* Qty controls */}
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-[13px] text-gray-300 min-w-[16px] text-center">{qty}</span>
+          <div className="flex items-center border border-[#3a3a3a] rounded-md overflow-hidden">
+            <button
+              onClick={() => { if (qty <= 1) onRemove(book.id); else onQty(book.id, qty - 1); }}
+              className="w-7 h-7 flex items-center justify-center bg-[#262626] hover:bg-[#333] text-gray-300 border-none cursor-pointer text-[16px] leading-none"
+            >−</button>
+            <button
+              onClick={() => onQty(book.id, qty + 1)}
+              className="w-7 h-7 flex items-center justify-center bg-[#262626] hover:bg-[#333] text-gray-300 border-none cursor-pointer text-[16px] leading-none border-l border-[#3a3a3a]"
+            >+</button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-/* ── Payment Option Card ── */
-const PaymentOption = ({ id, label, icon, selected, onSelect, children }) => (
-  <label
-    htmlFor={id}
-    className={`flex flex-col gap-2 border rounded-lg p-3 cursor-pointer transition-colors ${selected ? "border-blue-500 bg-blue-500/10" : "border-[#3a3a3a] bg-[#1e1e1e] hover:border-[#555]"}`}
-  >
-    <div className="flex items-center gap-2">
-      <input
-        type="radio" id={id} name="payment" value={id}
-        checked={selected} onChange={() => onSelect(id)}
-        className="accent-blue-500"
-      />
-      <span className="text-[14px]">{icon}</span>
-      <span className="text-[13px] font-medium text-gray-200">{label}</span>
-    </div>
-    {selected && children}
-  </label>
-);
-
 /* ── Checkout Page ── */
-const CheckoutPage = ({ onBack, onOrderPlaced }) => {
-  const { items, removeFromCart, updateQty, subtotal, clearCart } = useCart();
+const CheckoutPage = () => {
+  const { items, removeFromCart, updateQty, subtotal } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Address
-  const [useSaved, setUseSaved]     = useState(false);
-  const [firstName, setFirstName]   = useState("");
-  const [lastName, setLastName]     = useState("");
+  const [useSaved, setUseSaved]       = useState(false);
+  const [firstName, setFirstName]     = useState("");
+  const [lastName, setLastName]       = useState("");
   const [addressLine, setAddressLine] = useState("");
-  const [email, setEmail]           = useState(user?.email ?? "");
-  const [city, setCity]             = useState("");
-  const [pin, setPin]               = useState("");
-  const [phone, setPhone]           = useState("");
-  const [state, setState]           = useState("");
-  const [country, setCountry]       = useState("India");
-
-  // Payment
-  const [paymentMethod, setPaymentMethod] = useState("upi");
-  const [upiId, setUpiId]                 = useState("");
-  const [cardNumber, setCardNumber]       = useState("");
-  const [cardExpiry, setCardExpiry]       = useState("");
-  const [cardCvv, setCardCvv]             = useState("");
-
-  // Gift points (mock: user has 200 points)
-  const AVAILABLE_POINTS = 200;
-  const [redeemPoints, setRedeemPoints] = useState(false);
-  const pointsDiscount = redeemPoints ? Math.min(AVAILABLE_POINTS * GIFT_POINTS_VALUE, subtotal) : 0;
+  const [email, setEmail]             = useState(user?.email ?? "");
+  const [city, setCity]               = useState("");
+  const [pin, setPin]                 = useState("");
+  const [phone, setPhone]             = useState("");
+  const [state, setState]             = useState("");
+  const [country, setCountry]         = useState("India");
 
   // Coupon
-  const [coupon, setCoupon]         = useState("");
+  const [coupon, setCoupon]               = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
-  const [couponMsg, setCouponMsg]   = useState("");
+  const [couponMsg, setCouponMsg]         = useState("");
 
-  // Placing
-  const [placing, setPlacing]       = useState(false);
-  const [error, setError]           = useState("");
+  const [placing] = useState(false);
+  const [error, setError] = useState("");
 
-  const tax           = Math.round(subtotal * TAX_RATE);
-  const totalDiscount = pointsDiscount + couponDiscount;
-  const grandTotal    = subtotal + tax - totalDiscount;
+  const tax        = Math.round(subtotal * TAX_RATE);
+  const grandTotal = subtotal + tax - couponDiscount;
+  const totalQty   = items.reduce((s, i) => s + i.qty, 0);
 
   const applyCoupon = () => {
     const code = coupon.trim().toUpperCase();
     if (code === "BOOKWORM10") { setCouponDiscount(Math.round(subtotal * 0.1)); setCouponMsg("10% off applied!"); }
-    else if (code === "FLAT50") { setCouponDiscount(50); setCouponMsg("₹50 off applied!"); }
-    else { setCouponDiscount(0); setCouponMsg("Invalid coupon code."); }
+    else if (code === "FLAT50")  { setCouponDiscount(50); setCouponMsg("₹50 off applied!"); }
+    else                         { setCouponDiscount(0);  setCouponMsg("Invalid coupon code."); }
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = () => {
     if (!firstName || !addressLine || !city || !pin || !phone) {
       setError("Please fill in all required address fields.");
       return;
     }
     setError("");
-    setPlacing(true);
-    try {
-      if (user) {
-        await Promise.all(
-          items.map((i) => placeOrder(user.id, i.book.id, i.book.price * i.qty))
-        );
-      }
-      clearCart();
-      onOrderPlaced();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setPlacing(false);
-    }
+    // Navigate to payment page passing the amount
+    navigate("/payment", { state: { grandTotal } });
   };
 
   if (items.length === 0) {
     return (
       <section className="flex-1 flex flex-col items-center justify-center bg-[#161616] gap-4">
-        <span className="text-[48px]">🛒</span>
+        <span className="text-[52px]">🛒</span>
         <p className="text-gray-400 text-[15px]">Your basket is empty.</p>
         <button
-          onClick={onBack}
+          onClick={() => navigate("/")}
           className="bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-semibold px-4 py-2 rounded-md border-none cursor-pointer transition-colors"
         >
           Continue Shopping
@@ -166,208 +134,177 @@ const CheckoutPage = ({ onBack, onOrderPlaced }) => {
 
   return (
     <section className="flex-1 flex flex-col bg-[#161616] overflow-y-auto h-[calc(100vh-56px)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
-      <div className="p-6 max-md:p-4 max-w-6xl w-full mx-auto flex flex-col gap-5">
+      <div className="p-6 max-md:p-4 w-full mx-auto flex flex-col gap-4" style={{ maxWidth: 960 }}>
 
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-[12px] text-gray-500">
-          <button onClick={onBack} className="bg-transparent border-none text-blue-400 cursor-pointer p-0 hover:underline text-[12px]">Home</button>
-          <span>/</span><span className="text-gray-300">Checkout</span>
+        <nav className="flex items-center gap-1 text-[12px] text-gray-500 flex-wrap">
+          <button onClick={() => navigate("/")} className="bg-transparent border-none text-blue-400 cursor-pointer p-0 hover:underline text-[12px]">Home</button>
+          {items[0]?.book?.tags?.[0] && (<><span>/</span><span className="text-blue-400">{items[0].book.tags[0]}</span></>)}
+          {items[0]?.book?.tags?.[1] && (<><span>/</span><span className="text-blue-400">{items[0].book.tags[1]}</span></>)}
+          {items[0] && (<><span>/</span><span className="text-blue-400">{items[0].book.title}</span></>)}
+          <span>/</span><span className="text-gray-400">Checkout</span>
+          <span>/</span>
         </nav>
 
-        <h1 className="text-[18px] font-bold text-gray-100 border-l-[3px] border-blue-500 pl-3">Shopping Cart</h1>
+        {/* Title */}
+        <h1 className="text-[20px] font-bold text-gray-100">Shopping Cart</h1>
 
-        <div className="flex gap-6 max-lg:flex-col">
-
-          {/* ── LEFT: Items + Address + Payment ── */}
-          <div className="flex flex-col gap-5 flex-1 min-w-0">
-
-            {/* Cart Items */}
-            <div className="flex flex-col gap-3">
-              {items.map((item) => (
-                <CartItem
-                  key={item.book.id}
-                  item={item}
-                  onRemove={removeFromCart}
-                  onQty={updateQty}
-                />
-              ))}
-            </div>
-
-            {/* Address */}
-            <div className="bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-5 flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-[15px] font-semibold text-gray-100">Address</h2>
-                <label className="flex items-center gap-2 text-[12px] text-gray-400 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={useSaved}
-                    onChange={(e) => setUseSaved(e.target.checked)}
-                    className="accent-blue-500"
-                  />
-                  Use Saved Address
-                </label>
+        {/* ── Cart items: horizontal scroll row ── */}
+        <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-4">
+          <div className="flex gap-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
+            {items.map((item) => (
+              <div key={item.book.id} className="shrink-0 w-[340px]">
+                <CartItem item={item} onRemove={removeFromCart} onQty={updateQty} />
               </div>
-
-              <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">First Name <span className="text-red-400">*</span></label>
-                  <input className={inputClass} placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">Last Name</label>
-                  <input className={inputClass} placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1 col-span-2 max-sm:col-span-1">
-                  <label className="text-[11px] text-gray-400">Address <span className="text-red-400">*</span></label>
-                  <input className={inputClass} placeholder="Address Line" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1 col-span-2 max-sm:col-span-1">
-                  <label className="text-[11px] text-gray-400">Email</label>
-                  <input className={inputClass} type="email" placeholder="e-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">City <span className="text-red-400">*</span></label>
-                  <input className={inputClass} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">Pin <span className="text-red-400">*</span></label>
-                  <input className={inputClass} placeholder="000000" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">Phone Number <span className="text-red-400">*</span></label>
-                  <div className="flex gap-2">
-                    <span className="bg-[#1f1f1f] border border-[#3a3a3a] rounded-md px-2 py-2 text-[13px] text-gray-400 shrink-0">+91</span>
-                    <input className={inputClass} placeholder="12345 67890" maxLength={10} value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">State</label>
-                  <input className={inputClass} placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-gray-400">Country</label>
-                  <select className={selectClass} value={country} onChange={(e) => setCountry(e.target.value)}>
-                    <option value="India">India</option>
-                    <option value="USA">USA</option>
-                    <option value="UK">UK</option>
-                    <option value="Australia">Australia</option>
-                    <option value="Canada">Canada</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment */}
-            <div className="bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-5 flex flex-col gap-4">
-              <h2 className="text-[15px] font-semibold text-gray-100">Payment Method</h2>
-              <div className="flex flex-col gap-2">
-
-                <PaymentOption id="upi" label="UPI" icon="📱" selected={paymentMethod === "upi"} onSelect={setPaymentMethod}>
-                  <input
-                    className={inputClass}
-                    placeholder="yourname@upi"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                  />
-                </PaymentOption>
-
-                <PaymentOption id="card" label="Credit / Debit Card" icon="💳" selected={paymentMethod === "card"} onSelect={setPaymentMethod}>
-                  <div className="flex flex-col gap-2">
-                    <input className={inputClass} placeholder="Card Number" maxLength={19} value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim())} />
-                    <div className="flex gap-2">
-                      <input className={inputClass} placeholder="MM/YY" maxLength={5} value={cardExpiry}
-                        onChange={(e) => setCardExpiry(e.target.value)} />
-                      <input className={inputClass} placeholder="CVV" maxLength={3} type="password" value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ""))} />
-                    </div>
-                  </div>
-                </PaymentOption>
-
-                <PaymentOption id="netbanking" label="Net Banking" icon="🏦" selected={paymentMethod === "netbanking"} onSelect={setPaymentMethod}>
-                  <select className={selectClass}>
-                    <option>Select your bank</option>
-                    <option>SBI</option><option>HDFC</option><option>ICICI</option>
-                    <option>Axis Bank</option><option>Kotak</option>
-                  </select>
-                </PaymentOption>
-
-                <PaymentOption id="cod" label="Cash on Delivery" icon="💵" selected={paymentMethod === "cod"} onSelect={setPaymentMethod}>
-                  <p className="text-[12px] text-gray-400">Pay ₹{grandTotal.toLocaleString("en-IN")} when your order arrives.</p>
-                </PaymentOption>
-
-              </div>
-            </div>
-
+            ))}
           </div>
+        </div>
 
-          {/* ── RIGHT: Order Summary ── */}
-          <div className="w-80 max-lg:w-full shrink-0 flex flex-col gap-4">
+        {/* ── Address + Summary row ── */}
+        <div className="flex gap-4 items-start max-lg:flex-col">
 
-            {/* Gift Points */}
-            <div className="bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-4 flex flex-col gap-3">
-              <h2 className="text-[14px] font-semibold text-gray-100">🎁 Redeem Gift Points</h2>
-              <p className="text-[12px] text-gray-400">You have <span className="text-yellow-400 font-semibold">{AVAILABLE_POINTS} points</span> = ₹{AVAILABLE_POINTS}</p>
-              <label className="flex items-center gap-2 text-[13px] text-gray-300 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={redeemPoints}
-                  onChange={(e) => setRedeemPoints(e.target.checked)}
-                  className="accent-blue-500"
-                />
-                Use {AVAILABLE_POINTS} points (save ₹{AVAILABLE_POINTS})
+          {/* Address — left */}
+          <div className="flex-1 min-w-0 bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[15px] font-semibold text-gray-100">Address</h2>
+              <label className="flex items-center gap-1.5 text-[12px] text-gray-400 cursor-pointer">
+                <input type="checkbox" checked={useSaved} onChange={(e) => setUseSaved(e.target.checked)} className="accent-blue-500" />
+                Use Saved Address
               </label>
             </div>
 
-            {/* Grand Total */}
-            <div className="bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-4 flex flex-col gap-3">
-              <h2 className="text-[15px] font-bold text-gray-100">Grand Total</h2>
+            <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+              {/* Row 1 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">First Name</label>
+                <input className={inputClass} placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">Last Name</label>
+                <input className={inputClass} placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">Address</label>
+                <input className={inputClass} placeholder="Address Line 2" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
+              </div>
 
-              <div className="flex flex-col gap-2 text-[13px]">
-                <div className="flex justify-between text-gray-300">
-                  <span>Price ({items.reduce((s, i) => s + i.qty, 0)} item{items.reduce((s, i) => s + i.qty, 0) !== 1 ? "s" : ""})</span>
-                  <span>&#8377;{subtotal.toLocaleString("en-IN")}</span>
-                </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Tax (12%)</span>
-                  <span>&#8377;{tax.toLocaleString("en-IN")}</span>
-                </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Delivery Charges</span>
-                  <span className="text-green-400">Free</span>
-                </div>
+              {/* Row 2 */}
+              <div className="flex flex-col gap-1 col-span-3 max-sm:col-span-1">
+                <label className="text-[11px] text-gray-400">e-mail</label>
+                <input className={inputClass} type="email" placeholder="e-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
 
-                {/* Coupon */}
-                <div className="flex gap-2 mt-1">
-                  <input
-                    className="flex-1 bg-[#1f1f1f] border border-[#3a3a3a] rounded-md px-2 py-1.5 text-[12px] text-gray-200 placeholder:text-gray-500 outline-none focus:border-[#555]"
-                    placeholder="Apply Coupon"
-                    value={coupon}
-                    onChange={(e) => { setCoupon(e.target.value); setCouponMsg(""); }}
-                    onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
-                  />
-                  <button
-                    onClick={applyCoupon}
-                    className="bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-semibold px-3 rounded-md border-none cursor-pointer transition-colors shrink-0"
-                  >
-                    Apply
-                  </button>
-                </div>
-                {couponMsg && (
-                  <p className={`text-[11px] ${couponMsg.includes("Invalid") ? "text-red-400" : "text-green-400"}`}>{couponMsg}</p>
-                )}
+              {/* Row 3 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">City</label>
+                <input className={inputClass} placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">Pin</label>
+                <input className={inputClass} placeholder="000000" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} />
+              </div>
 
-                {totalDiscount > 0 && (
-                  <div className="flex justify-between text-green-400">
-                    <span>Discount</span>
-                    <span>− &#8377;{totalDiscount.toLocaleString("en-IN")}</span>
+              {/* Row 4 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">Phone Number</label>
+                <div className="flex gap-1">
+                  <div className="bg-[#1c1c1c] border border-[#3a3a3a] rounded-md px-2 flex items-center text-[13px] text-gray-400 shrink-0 cursor-pointer select-none">
+                    +91 ▾
                   </div>
-                )}
-
-                <div className="border-t border-[#3a3a3a] pt-2 flex justify-between font-bold text-gray-100 text-[14px]">
-                  <span>Total Amount</span>
-                  <span>&#8377;{grandTotal.toLocaleString("en-IN")}</span>
+                  <input className={inputClass} placeholder="12345 67890" maxLength={10} value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} />
                 </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">State</label>
+                <input className={inputClass} placeholder="State" value={state} onChange={(e) => setState(e.target.value)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-gray-400">Country</label>
+                <select className={selectClass} value={country} onChange={(e) => setCountry(e.target.value)}>
+                  <option>India</option><option>USA</option><option>UK</option>
+                  <option>Australia</option><option>Canada</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Grand Total — right */}
+          <div className="w-72 max-lg:w-full shrink-0 bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl overflow-hidden flex flex-col">
+
+            {/* Illustration */}
+            <div className="h-[130px] bg-[#1e3a5f] flex items-center justify-center overflow-hidden relative">
+              <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                {/* Background glow */}
+                <circle cx="140" cy="65" r="55" fill="#2563eb" fillOpacity="0.15"/>
+                {/* Book stack */}
+                <rect x="70" y="75" width="55" height="38" rx="4" fill="#f59e0b"/>
+                <rect x="73" y="72" width="55" height="38" rx="4" fill="#fbbf24"/>
+                <rect x="76" y="50" width="50" height="40" rx="4" fill="#1d4ed8"/>
+                <rect x="79" y="47" width="50" height="40" rx="4" fill="#3b82f6"/>
+                {/* Open book */}
+                <path d="M130 60 Q155 50 175 60 L175 95 Q155 85 130 95 Z" fill="#0f172a" stroke="#334155" strokeWidth="1"/>
+                <path d="M175 60 Q195 50 215 60 L215 95 Q195 85 175 95 Z" fill="#1e293b" stroke="#334155" strokeWidth="1"/>
+                <line x1="175" y1="60" x2="175" y2="95" stroke="#475569" strokeWidth="1.5"/>
+                {/* Lines on book pages */}
+                <line x1="138" y1="70" x2="168" y2="64" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                <line x1="138" y1="76" x2="168" y2="71" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                <line x1="138" y1="82" x2="168" y2="78" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                <line x1="182" y1="64" x2="208" y2="70" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                <line x1="182" y1="71" x2="208" y2="76" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                <line x1="182" y1="78" x2="208" y2="82" stroke="#475569" strokeWidth="1" opacity="0.6"/>
+                {/* Stars / dots */}
+                <circle cx="105" cy="40" r="2.5" fill="#fbbf24" opacity="0.8"/>
+                <circle cx="225" cy="42" r="2" fill="#60a5fa" opacity="0.8"/>
+                <circle cx="90" cy="68" r="1.5" fill="#a78bfa" opacity="0.7"/>
+                <circle cx="230" cy="75" r="3" fill="#fbbf24" opacity="0.5"/>
+              </svg>
+            </div>
+
+            {/* Summary rows */}
+            <div className="p-4 flex flex-col gap-2.5 text-[13px]">
+              <h2 className="text-[15px] font-bold text-gray-100 mb-1">Grand Total</h2>
+
+              <div className="flex justify-between text-gray-300">
+                <span>Price ({totalQty} item{totalQty !== 1 ? "s" : ""})</span>
+                <span>&#8377;{subtotal.toLocaleString("en-IN")}.00</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>Tax</span>
+                <span>&#8377;{tax.toLocaleString("en-IN")}.00</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>Delivery Charges</span>
+                <span className="text-gray-300">Free</span>
+              </div>
+
+              {/* Coupon row */}
+              <div className="flex gap-2 mt-1">
+                <input
+                  className="flex-1 bg-[#1c1c1c] border border-[#3a3a3a] rounded-md px-2.5 py-1.5 text-[12px] text-gray-200 placeholder:text-gray-500 outline-none focus:border-[#555]"
+                  placeholder="Apply Coupon"
+                  value={coupon}
+                  onChange={(e) => { setCoupon(e.target.value); setCouponMsg(""); }}
+                  onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                />
+                <button
+                  onClick={applyCoupon}
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-semibold px-3 rounded-md border-none cursor-pointer transition-colors shrink-0"
+                >
+                  Apply
+                </button>
+              </div>
+              {couponMsg && (
+                <p className={`text-[11px] -mt-1 ${couponMsg.includes("Invalid") ? "text-red-400" : "text-green-400"}`}>{couponMsg}</p>
+              )}
+
+              <div className="flex justify-between text-gray-300">
+                <span>Discount</span>
+                <span>&#8377;{couponDiscount.toLocaleString("en-IN")}.00</span>
+              </div>
+
+              <div className="flex justify-between font-bold text-gray-100 text-[14px] border-t border-[#3a3a3a] pt-2 mt-1">
+                <span>Total Amount</span>
+                <span>&#8377;{grandTotal.toLocaleString("en-IN")}</span>
               </div>
 
               {error && (
@@ -377,15 +314,13 @@ const CheckoutPage = ({ onBack, onOrderPlaced }) => {
               <button
                 onClick={handlePlaceOrder}
                 disabled={placing}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[14px] font-semibold py-2.5 rounded-lg border-none cursor-pointer transition-colors flex items-center justify-center gap-2"
+                className="mt-1 w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-[13px] font-semibold py-2.5 rounded-lg border-none cursor-pointer transition-colors flex items-center justify-center gap-2"
               >
                 {placing ? "Placing Order…" : <><span>Pay Now</span><span>🛒</span></>}
               </button>
-
-              <p className="text-[11px] text-gray-500 text-center">Hint: try coupon <span className="text-gray-300 font-medium">BOOKWORM10</span> or <span className="text-gray-300 font-medium">FLAT50</span></p>
             </div>
-
           </div>
+
         </div>
       </div>
     </section>

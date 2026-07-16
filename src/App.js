@@ -17,6 +17,7 @@ import BookDetail from "./components/BookDetail";
 import AuthPage from "./components/Auth";
 import OrdersPage from "./components/Orders";
 import CheckoutPage from "./components/Checkout";
+import PaymentPage from "./components/Payment";
 import WishlistPage from "./components/Wishlist";
 import WritersPage from "./components/Writers";
 import useBooks from "./hooks/useBooks";
@@ -137,6 +138,15 @@ const AppRoutes = () => {
               onOrderPlaced={() => window.location.replace("/orders")}
             />
           </PageShell>
+        }
+      />
+      <Route
+        path="/payment"
+        element={
+          <div className="flex flex-col h-screen overflow-hidden bg-[#161616] text-gray-200">
+            <Header />
+            <PaymentPage />
+          </div>
         }
       />
       <Route

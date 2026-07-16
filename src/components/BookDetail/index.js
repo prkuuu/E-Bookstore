@@ -59,7 +59,6 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) =
   const handleAddToCart = () => {
     addToCart(book);
     setCartAdded(true);
-    setTimeout(() => setCartAdded(false), 1500);
   };
 
   return (
