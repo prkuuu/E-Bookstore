@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./index.css";
+import { useCart } from "../../context/CartContext";
 
 const StarRating = ({ value, interactive = false, onChange }) => {
   const [hovered, setHovered] = useState(0);
@@ -44,7 +45,8 @@ const RelatedCard = ({ book, onClick }) => (
   </div>
 );
 
-const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
+const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) => {
+  const { addToCart } = useCart();
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [cartAdded, setCartAdded] = useState(false);
@@ -55,6 +57,7 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
   ).slice(0, 3);
 
   const handleAddToCart = () => {
+    addToCart(book);
     setCartAdded(true);
     setTimeout(() => setCartAdded(false), 1500);
   };
@@ -110,8 +113,16 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
                   className={`detail__btn detail__btn--primary ${cartAdded ? "detail__btn--added" : ""}`}
                   onClick={handleAddToCart}
                 >
-                  {cartAdded ? "✓ Added" : "Add to Cart"} <span className="detail__btn-icon">🛒</span>
+                  {cartAdded ? "✓ Added to Basket" : "Add to Cart"} <span className="detail__btn-icon">🛒</span>
                 </button>
+                {cartAdded && (
+                  <button
+                    className="detail__btn detail__btn--secondary"
+                    onClick={onGoToCart}
+                  >
+                    Go to Basket →
+                  </button>
+                )}
                 <button
                   className={`detail__btn detail__btn--secondary ${wishlisted ? "detail__btn--wishlisted" : ""}`}
                   onClick={() => setWishlisted((w) => !w)}
