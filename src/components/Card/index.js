@@ -1,6 +1,6 @@
-import React from "react";
+import React, { memo } from "react";
 
-const BookCard = ({ book, onClick }) => {
+const BookCard = memo(({ book, onClick }) => {
   const { title, author, format, tags, price, delivery, cover, initials } = book;
 
   return (
@@ -41,6 +41,7 @@ const BookCard = ({ book, onClick }) => {
       </div>
     </div>
   );
-};
+});
 
+BookCard.displayName = "BookCard";
 export default BookCard;

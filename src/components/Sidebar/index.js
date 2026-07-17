@@ -1,7 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 import useCategories from "../../hooks/useCategories";
 
-const Sidebar = ({ activeCategory, onSelect }) => {
+const Sidebar = memo(({ activeCategory, onSelect }) => {
   const { categories, loading, error } = useCategories(activeCategory);
   console.log('categories', categories, activeCategory)
 
@@ -31,6 +31,7 @@ const Sidebar = ({ activeCategory, onSelect }) => {
       </ul>
     </aside>
   );
-};
+});
 
+Sidebar.displayName = "Sidebar";
 export default Sidebar;

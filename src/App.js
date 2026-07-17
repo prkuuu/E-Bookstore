@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import "./App.css";
 import {
   BrowserRouter,
@@ -10,17 +10,30 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
+
+// ── Eager imports (critical path — always needed on first render) ──
+import Header       from "./components/Header";
+import Sidebar      from "./components/Sidebar";
 import BookCatalogue from "./components/Catalogue";
-import BookDetail from "./components/BookDetail";
-import AuthPage from "./components/Auth";
-import OrdersPage from "./components/Orders";
-import CheckoutPage from "./components/Checkout";
-import PaymentPage from "./components/Payment";
-import WishlistPage from "./components/Wishlist";
-import WritersPage from "./components/Writers";
-import useBooks from "./hooks/useBooks";
+import BookDetail   from "./components/BookDetail";
+import useBooks     from "./hooks/useBooks";
+
+// ── Lazy imports (loaded only when the user navigates to that route) ──
+// NOTE: these paths MUST match the ones in src/prefetch.js exactly
+const AuthPage     = lazy(() => import("./components/Auth"));
+const OrdersPage   = lazy(() => import("./components/Orders"));
+const CheckoutPage = lazy(() => import("./components/Checkout"));
+const PaymentPage  = lazy(() => import("./components/Payment"));
+const WishlistPage = lazy(() => import("./components/Wishlist"));
+const WritersPage  = lazy(() => import("./components/Writers"));
+
+// ── Fallback: keeps the full chrome (Header + sidebar placeholder) visible ──
+const PageLoader = () => (
+  <div className="flex flex-1 flex-col items-center justify-center bg-[#161616] gap-3">
+    <div className="w-8 h-8 border-2 border-[#3a3a3a] border-t-blue-500 rounded-full animate-spin" />
+    <span className="text-[13px] text-gray-500">Loading…</span>
+  </div>
+);
 
 /* ── Guard: redirects unauthenticated users to /login ── */
 const PrivateRoute = ({ children }) => {
@@ -84,9 +97,13 @@ const CatalogueShell = () => {
   );
 };
 
-/* ── Simple page wrapper (no sidebar) ── */
+/* ── Simple page wrapper — Suspense is HERE so Header/Layout never unmounts ── */
 const PageShell = ({ children }) => (
-  <Layout>{children}</Layout>
+  <Layout>
+    <Suspense fallback={<PageLoader />}>
+      {children}
+    </Suspense>
+  </Layout>
 );
 
 /* ── App ── */
@@ -112,10 +129,11 @@ const AppRoutes = () => {
           user
             ? <Navigate to={(location.state?.from?.pathname) || "/"} replace />
             : (
-              <div className="flex flex-col h-screen overflow-hidden bg-[#161616] text-gray-200">
-                <Header />
-                <AuthPage onBack={() => window.history.back()} />
-              </div>
+              <Layout>
+                <Suspense fallback={<PageLoader />}>
+                  <AuthPage onBack={() => window.history.back()} />
+                </Suspense>
+              </Layout>
             )
         }
       />
@@ -131,35 +149,25 @@ const AppRoutes = () => {
       />
       <Route
         path="/cart"
-        element={
-          <PageShell>
-            <CheckoutPage
-              onBack={() => window.history.back()}
-              onOrderPlaced={() => window.location.replace("/orders")}
-            />
-          </PageShell>
-        }
+        element={<PageShell><CheckoutPage /></PageShell>}
       />
       <Route
         path="/payment"
         element={
-          <div className="flex flex-col h-screen overflow-hidden bg-[#161616] text-gray-200">
-            <Header />
-            <PaymentPage />
-          </div>
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <PaymentPage />
+            </Suspense>
+          </Layout>
         }
       />
       <Route
         path="/wishlist"
-        element={
-          <PageShell><WishlistPage /></PageShell>
-        }
+        element={<PageShell><WishlistPage /></PageShell>}
       />
       <Route
         path="/writers"
-        element={
-          <PageShell><WritersPage /></PageShell>
-        }
+        element={<PageShell><WritersPage /></PageShell>}
       />
 
       {/* Fallback */}

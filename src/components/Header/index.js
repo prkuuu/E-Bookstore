@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { prefetch } from "../../prefetch";
 
 const navLinkClass = ({ isActive }) =>
   `text-[14px] font-medium px-3.5 py-1.5 rounded-md transition-colors duration-150 whitespace-nowrap cursor-pointer no-underline
@@ -38,14 +39,15 @@ const Header = () => {
       <nav className="hidden sm:flex items-center gap-1 shrink-0">
         <button
           onClick={handleOrdersClick}
+          onMouseEnter={prefetch.orders}
           className={navLinkClass({ isActive: window.location.pathname === "/orders" })}
         >
           My Orders
         </button>
-        <NavLink to="/wishlist" className={navLinkClass}>
+        <NavLink to="/wishlist" className={navLinkClass} onMouseEnter={prefetch.wishlist}>
           My Wishlist
         </NavLink>
-        <NavLink to="/writers" className={navLinkClass}>
+        <NavLink to="/writers" className={navLinkClass} onMouseEnter={prefetch.writers}>
           My Writers
         </NavLink>
       </nav>
@@ -57,6 +59,7 @@ const Header = () => {
         <button
           aria-label="Cart"
           onClick={() => navigate("/cart")}
+          onMouseEnter={prefetch.cart}
           className="relative bg-transparent border-none cursor-pointer p-1.5 rounded-md leading-none transition-colors duration-150 hover:bg-[#1f2937]"
         >
           <span className="text-[20px] text-gray-300 block">&#128722;</span>
@@ -104,6 +107,7 @@ const Header = () => {
             aria-label="Sign In"
             className="relative bg-transparent border-none cursor-pointer p-1.5 rounded-md leading-none transition-colors duration-150 hover:bg-[#1f2937]"
             onClick={() => navigate("/login")}
+            onMouseEnter={prefetch.login}
           >
             <span className="text-[20px] text-gray-300 block">&#128100;</span>
           </button>

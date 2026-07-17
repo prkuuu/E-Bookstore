@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useOrders from "../../hooks/useOrders";
 import { placeOrder } from "../../services/orderService";
@@ -16,7 +16,8 @@ function deriveInitials(title) {
   return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("") || title[0].toUpperCase();
 }
 
-const OrderCard = ({ order, onBuyAgain }) => {
+// memo: only re-renders when this specific order's data or the buy-again handler changes
+const OrderCard = memo(({ order, onBuyAgain }) => {
   const book = order.books;
   const cover    = book?.cover    ?? deriveCover(book?.id ?? 0);
   const initials = book?.initials ?? deriveInitials(book?.title ?? "");
@@ -69,20 +70,22 @@ const OrderCard = ({ order, onBuyAgain }) => {
       </button>
     </div>
   );
-};
+});
+OrderCard.displayName = "OrderCard";
 
 const OrdersPage = ({ onBookSelect }) => {
   const { user } = useAuth();
   const { orders, loading, error, refetch } = useOrders(user?.id);
 
-  const handleBuyAgain = async (order) => {
+  // useCallback: stable reference prevents every OrderCard from re-rendering when OrdersPage re-renders
+  const handleBuyAgain = useCallback(async (order) => {
     try {
       await placeOrder(user.id, order.books.id, order.total_price);
       refetch();
     } catch (err) {
       console.error("Buy Again failed:", err.message);
     }
-  };
+  }, [user?.id, refetch]);
 
   return (
     <section className="flex-1 flex flex-col bg-[#161616] overflow-y-auto h-[calc(100vh-56px)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">

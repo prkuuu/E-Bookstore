@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import "./index.css";
 import { useCart } from "../../context/CartContext";
 
@@ -21,7 +21,8 @@ const StarRating = ({ value, interactive = false, onChange }) => {
   );
 };
 
-const RelatedCard = ({ book, onClick }) => (
+// memo: up to 3 instances; only re-renders when the related book or click handler changes
+const RelatedCard = memo(({ book, onClick }) => (
   <div className="related-card" onClick={onClick}>
     <div className="related-card__cover" style={{ backgroundColor: book.cover }}>
       <span className="related-card__initials">{book.initials}</span>
@@ -43,7 +44,8 @@ const RelatedCard = ({ book, onClick }) => (
       <p className="related-card__delivery">Delivery by <strong>{book.delivery}</strong></p>
     </div>
   </div>
-);
+));
+RelatedCard.displayName = "RelatedCard";
 
 const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) => {
   const { addToCart } = useCart();
@@ -52,14 +54,18 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) =
   const [cartAdded, setCartAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  const related = allBooks.filter(
-    (b) => b.id !== book.id && b.tags.some((t) => book.tags.includes(t))
-  ).slice(0, 3);
+  // useMemo: allBooks can be large; only recompute when book.id or allBooks reference changes
+  const related = useMemo(
+    () => allBooks.filter(
+      (b) => b.id !== book.id && b.tags.some((t) => book.tags.includes(t))
+    ).slice(0, 3),
+    [book.id, book.tags, allBooks]
+  );
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     addToCart(book);
     setCartAdded(true);
-  };
+  }, [addToCart, book]);
 
   return (
     <div className="detail">

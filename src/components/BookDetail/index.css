@@ -431,7 +431,7 @@
 }
 
 .related-card:last-child { border-bottom: none; }
-.related-card:hover { background-color: #1c1c1c; border-radius: 6px; padding-left: 6px; }
+.related-card:hover { background-color: #1c1c1c; }
 
 .related-card__cover {
   width: 64px;
