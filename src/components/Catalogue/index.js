@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import BookCard from "../Card";
 
 // module-level constant — evaluated once at import time
@@ -61,7 +61,8 @@ function filterAndSort(sections, { activeCategory, search, language, format, pri
     : [];
 }
 
-const FilterGroup = ({ label, children, grow }) => (
+// memo: re-renders only when label/grow/children reference changes
+const FilterGroup = memo(({ label, children, grow }) => (
   <div
     className={`flex flex-col bg-[#262626] border-b border-[#3a3a3a] px-3 py-3 min-w-0 focus-within:border-[#555]${grow ? " flex-1 min-w-20" : ""}`}
   >
@@ -70,9 +71,11 @@ const FilterGroup = ({ label, children, grow }) => (
     </span>
     {children}
   </div>
-);
+));
+FilterGroup.displayName = "FilterGroup";
 
-const FilterSelect = ({ label, value, onChange, options, ariaLabel }) => (
+// memo: each FilterSelect only re-renders when its own value changes
+const FilterSelect = memo(({ label, value, onChange, options, ariaLabel }) => (
   <FilterGroup label={label}>
     <select className={selectClass} value={value} onChange={onChange} aria-label={ariaLabel}>
       {options.map(({ value: v, label: l }) => (
@@ -80,7 +83,8 @@ const FilterSelect = ({ label, value, onChange, options, ariaLabel }) => (
       ))}
     </select>
   </FilterGroup>
-);
+));
+FilterSelect.displayName = "FilterSelect";
 
 const BookCatalogue = ({ books, loading, error, activeCategory, onBookSelect }) => {
 
@@ -88,8 +92,11 @@ const BookCatalogue = ({ books, loading, error, activeCategory, onBookSelect }) 
     language: "All", format: "All",
     priceRange: "All", sortBy: "Relevance", search: ""
   });
-  const handleFilterChange = (key, value) =>
-    setFilters(prev => ({ ...prev, [key]: value }));
+  // useCallback: stable reference so FilterSelect/FilterGroup children don't re-render on unrelated state changes
+  const handleFilterChange = useCallback(
+    (key, value) => setFilters(prev => ({ ...prev, [key]: value })),
+    [] // setFilters is stable — no deps needed
+  );
 
   const filteredSections = useMemo(
     () => filterAndSort(books, { activeCategory, ...filters }),

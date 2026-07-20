@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, memo } from "react";
 import "./index.css";
+import { useCart } from "../../context/CartContext";
+import BookCover from "../BookCover";
 
 const StarRating = ({ value, interactive = false, onChange }) => {
   const [hovered, setHovered] = useState(0);
@@ -20,11 +22,15 @@ const StarRating = ({ value, interactive = false, onChange }) => {
   );
 };
 
-const RelatedCard = ({ book, onClick }) => (
+// memo: up to 3 instances; only re-renders when the related book or click handler changes
+const RelatedCard = memo(({ book, onClick }) => (
   <div className="related-card" onClick={onClick}>
-    <div className="related-card__cover" style={{ backgroundColor: book.cover }}>
-      <span className="related-card__initials">{book.initials}</span>
-    </div>
+    <BookCover
+      coverUrl={book.coverUrl}
+      cover={book.cover}
+      initials={book.initials}
+      className="related-card__cover"
+    />
     <div className="related-card__info">
       <h4 className="related-card__title">{book.title}</h4>
       <p className="related-card__author">by <a href="#" className="link">{book.author}</a></p>
@@ -42,22 +48,28 @@ const RelatedCard = ({ book, onClick }) => (
       <p className="related-card__delivery">Delivery by <strong>{book.delivery}</strong></p>
     </div>
   </div>
-);
+));
+RelatedCard.displayName = "RelatedCard";
 
-const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
+const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) => {
+  const { addToCart } = useCart();
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [cartAdded, setCartAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  const related = allBooks.filter(
-    (b) => b.id !== book.id && b.tags.some((t) => book.tags.includes(t))
-  ).slice(0, 3);
+  // useMemo: allBooks can be large; only recompute when book.id or allBooks reference changes
+  const related = useMemo(
+    () => allBooks.filter(
+      (b) => b.id !== book.id && b.tags.some((t) => book.tags.includes(t))
+    ).slice(0, 3),
+    [book.id, book.tags, allBooks]
+  );
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
+    addToCart(book);
     setCartAdded(true);
-    setTimeout(() => setCartAdded(false), 1500);
-  };
+  }, [addToCart, book]);
 
   return (
     <div className="detail">
@@ -78,9 +90,12 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
           <div className="detail__hero">
             {/* Cover */}
             <div className="detail__cover-wrap">
-              <div className="detail__cover" style={{ backgroundColor: book.cover }}>
-                <span className="detail__cover-initials">{book.initials}</span>
-              </div>
+              <BookCover
+                coverUrl={book.coverUrl}
+                cover={book.cover}
+                initials={book.initials}
+                className="detail__cover"
+              />
             </div>
 
             {/* Info panel */}
@@ -110,8 +125,16 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect }) => {
                   className={`detail__btn detail__btn--primary ${cartAdded ? "detail__btn--added" : ""}`}
                   onClick={handleAddToCart}
                 >
-                  {cartAdded ? "✓ Added" : "Add to Cart"} <span className="detail__btn-icon">🛒</span>
+                  {cartAdded ? "✓ Added to Basket" : "Add to Cart"} <span className="detail__btn-icon">🛒</span>
                 </button>
+                {cartAdded && (
+                  <button
+                    className="detail__btn detail__btn--secondary"
+                    onClick={onGoToCart}
+                  >
+                    Go to Basket →
+                  </button>
+                )}
                 <button
                   className={`detail__btn detail__btn--secondary ${wishlisted ? "detail__btn--wishlisted" : ""}`}
                   onClick={() => setWishlisted((w) => !w)}

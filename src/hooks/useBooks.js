@@ -11,6 +11,15 @@ function deriveCover(id) {
   return COVER_PALETTE[id % COVER_PALETTE.length];
 }
 
+// Supabase Storage public URL for a book cover image.
+// Files should be named {id}.webp (or .jpg) inside the "eBookStore" bucket.
+const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET ?? "";
+
+function deriveCoverUrl(id) {
+  if (!SUPABASE_BUCKET) return null;
+  return `${SUPABASE_BUCKET}/${id}.webp`;
+}
+
 function deriveInitials(title) {
   if (!title) return "?";
   const skip = new Set(["a", "an", "the", "of", "in", "on", "at", "to", "and"]);
@@ -41,7 +50,8 @@ function transformBooks(sections) {
       publisher: book.publisher?.trim(),
       language: book.language?.trim(),
       delivery: book.delivery,
-      cover: deriveCover(book.id),
+      cover: deriveCover(book.id),       // fallback colour when no image
+      coverUrl: deriveCoverUrl(book.id), // real image from Supabase Storage
       initials: deriveInitials(book.title),
       tags: (book.book_tags ?? []).map((bt) => bt.tags?.name).filter(Boolean),
       reviews: (book.reviews ?? []).map((r) => ({
@@ -65,7 +75,6 @@ const useBooks = () => {
       setError(null);
       try {
         const raw = await getBooks();
-        console.log('useBooks', raw)
         setBooks(transformBooks(raw));
       } catch (err) {
         setError(err.message);
