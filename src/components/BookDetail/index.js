@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, memo } from "react";
 import "./index.css";
 import { useCart } from "../../context/CartContext";
+import BookCover from "../BookCover";
 
 const StarRating = ({ value, interactive = false, onChange }) => {
   const [hovered, setHovered] = useState(0);
@@ -24,9 +25,12 @@ const StarRating = ({ value, interactive = false, onChange }) => {
 // memo: up to 3 instances; only re-renders when the related book or click handler changes
 const RelatedCard = memo(({ book, onClick }) => (
   <div className="related-card" onClick={onClick}>
-    <div className="related-card__cover" style={{ backgroundColor: book.cover }}>
-      <span className="related-card__initials">{book.initials}</span>
-    </div>
+    <BookCover
+      coverUrl={book.coverUrl}
+      cover={book.cover}
+      initials={book.initials}
+      className="related-card__cover"
+    />
     <div className="related-card__info">
       <h4 className="related-card__title">{book.title}</h4>
       <p className="related-card__author">by <a href="#" className="link">{book.author}</a></p>
@@ -86,9 +90,12 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) =
           <div className="detail__hero">
             {/* Cover */}
             <div className="detail__cover-wrap">
-              <div className="detail__cover" style={{ backgroundColor: book.cover }}>
-                <span className="detail__cover-initials">{book.initials}</span>
-              </div>
+              <BookCover
+                coverUrl={book.coverUrl}
+                cover={book.cover}
+                initials={book.initials}
+                className="detail__cover"
+              />
             </div>
 
             {/* Info panel */}

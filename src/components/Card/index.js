@@ -1,7 +1,8 @@
 import React, { memo } from "react";
+import BookCover from "../BookCover";
 
 const BookCard = memo(({ book, onClick }) => {
-  const { title, author, format, tags, price, delivery, cover, initials } = book;
+  const { title, author, format, price, delivery, cover, coverUrl, initials } = book;
 
   return (
     <div
@@ -10,14 +11,12 @@ const BookCard = memo(({ book, onClick }) => {
       onClick={onClick}
     >
       {/* Cover */}
-      <div
-        className="w-14 h-19 rounded shrink-0 flex items-center justify-center"
-        style={{ backgroundColor: cover }}
-      >
-        <span className="text-[13px] font-bold tracking-[1px] text-white/85">
-          {initials}
-        </span>
-      </div>
+      <BookCover
+        coverUrl={coverUrl}
+        cover={cover}
+        initials={initials}
+        className="w-14 h-[76px] rounded shrink-0"
+      />
 
       {/* Info */}
       <div className="flex flex-col gap-0.5 min-w-0">

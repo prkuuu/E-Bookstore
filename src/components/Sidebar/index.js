@@ -15,7 +15,7 @@ const Sidebar = memo(({ activeCategory, onSelect }) => {
           <li className="px-5 py-3 text-[13px] text-red-400">{error}</li>
         )}
         {!loading && !error && categories.map((cat) => (
-          <li key={cat.name}>
+          <li key={cat.id}>
             <button
               onClick={() => onSelect(cat.name)}
               className={`block w-full text-left bg-transparent border-none cursor-pointer text-[13.5px] font-[inherit] py-2 px-5 border-l-[3px] transition-all duration-120

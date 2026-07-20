@@ -2,12 +2,18 @@ import React, { useState, useCallback, memo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useOrders from "../../hooks/useOrders";
 import { placeOrder } from "../../services/orderService";
+import BookCover from "../BookCover";
 
 const COVER_PALETTE = [
   "#c0392b", "#2980b9", "#27ae60", "#8e44ad",
   "#d35400", "#16a085", "#2c3e50", "#e67e22",
 ];
-const deriveCover = (id) => COVER_PALETTE[id % COVER_PALETTE.length];
+const deriveCover    = (id) => COVER_PALETTE[id % COVER_PALETTE.length];
+const deriveCoverUrl = (id) => {
+  const url = process.env.SUPABASE_URL;
+  if (!url || !id) return null;
+  return `${url}/storage/v1/object/public/ebookStore/${id}.webp`;
+};
 
 function deriveInitials(title) {
   if (!title) return "?";
@@ -18,9 +24,10 @@ function deriveInitials(title) {
 
 // memo: only re-renders when this specific order's data or the buy-again handler changes
 const OrderCard = memo(({ order, onBuyAgain }) => {
-  const book = order.books;
-  const cover    = book?.cover    ?? deriveCover(book?.id ?? 0);
-  const initials = book?.initials ?? deriveInitials(book?.title ?? "");
+  const book     = order.books;
+  const cover    = deriveCover(book?.id ?? 0);
+  const coverUrl = deriveCoverUrl(book?.id);
+  const initials = deriveInitials(book?.title ?? "");
   const [buying, setBuying] = useState(false);
   const [done, setDone]     = useState(false);
 
@@ -39,12 +46,12 @@ const OrderCard = memo(({ order, onBuyAgain }) => {
   return (
     <div className="flex gap-4 bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg p-4 items-start hover:border-[#555] transition-colors">
       {/* Cover */}
-      <div
-        className="w-14 h-20 rounded shrink-0 flex items-center justify-center text-[13px] font-bold tracking-wider text-white/85"
-        style={{ backgroundColor: cover }}
-      >
-        {initials}
-      </div>
+      <BookCover
+        coverUrl={coverUrl}
+        cover={cover}
+        initials={initials}
+        className="w-14 h-20 rounded shrink-0"
+      />
 
       {/* Info */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
