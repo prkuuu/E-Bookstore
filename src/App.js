@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 // ── Eager imports (critical path — always needed on first render) ──
 import Header       from "./components/Header";
@@ -180,7 +181,9 @@ const App = () => (
   <BrowserRouter>
     <AuthProvider>
       <CartProvider>
-        <AppRoutes />
+        <WishlistProvider>
+          <AppRoutes />
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   </BrowserRouter>

@@ -1,43 +1,29 @@
 import { useEffect, useState } from "react";
 import { getBooks } from "../services/bookService";
-import { categories } from "../data/books";
+import { deriveCover, deriveCoverUrl, deriveInitials } from "../lib/bookUtils";
 
-const COVER_PALETTE = [
-  "#c0392b", "#2980b9", "#27ae60", "#8e44ad",
-  "#d35400", "#16a085", "#2c3e50", "#e67e22",
+// Section display order — sections not in this list fall back to "All Books" at the end
+const SECTION_ORDER = [
+  "Recommended for You",
+  "Bestsellers this Month",
+  "New Launches",
 ];
 
-function deriveCover(id) {
-  return COVER_PALETTE[id % COVER_PALETTE.length];
-}
-
-// Supabase Storage public URL for a book cover image.
-// Files should be named {id}.webp (or .jpg) inside the "eBookStore" bucket.
-const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET ?? "";
-
-function deriveCoverUrl(id) {
-  if (!SUPABASE_BUCKET) return null;
-  return `${SUPABASE_BUCKET}/${id}.webp`;
-}
-
-function deriveInitials(title) {
-  if (!title) return "?";
-  const skip = new Set(["a", "an", "the", "of", "in", "on", "at", "to", "and"]);
-  const words = title.trim().split(/\s+/).filter((w) => !skip.has(w.toLowerCase()));
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("") || title[0].toUpperCase();
-}
-
 /**
- * Transforms raw Supabase sections data into the shape used by the UI.
+ * Transforms a flat array of book rows (each with a `section` column)
+ * into the grouped shape used by the UI.
  *
- * Input:  [ { title, section_books: [ { books: { ...bookRow } } ] } ]
- * Output: [ { title, books: [ { id, title, author, tags, reviews, ... } ] } ]
+ * Input:  [ { id, title, section, reviews, book_tags, book_categories, ... } ]
+ * Output: [ { title: sectionName, books: [ { id, title, ... } ] } ]
  */
-function transformBooks(sections) {
-  return sections.map((section) => ({
-    id: section.id,
-    title: section.title,
-    books: (section.section_books ?? []).map(({ books: book }) => ({
+function transformBooks(rawBooks) {
+  // Build a map: sectionName → [book, ...]
+  const map = new Map();
+
+  for (const book of rawBooks) {
+    const sectionName = book.section?.trim() || "All Books";
+    if (!map.has(sectionName)) map.set(sectionName, []);
+    map.get(sectionName).push({
       id: book.id,
       title: book.title?.trim(),
       author: book.author?.trim(),
@@ -50,8 +36,8 @@ function transformBooks(sections) {
       publisher: book.publisher?.trim(),
       language: book.language?.trim(),
       delivery: book.delivery,
-      cover: deriveCover(book.id),       // fallback colour when no image
-      coverUrl: deriveCoverUrl(book.id), // real image from Supabase Storage
+      cover: deriveCover(book.id),
+      coverUrl: deriveCoverUrl(book.title),
       initials: deriveInitials(book.title),
       tags: (book.book_tags ?? []).map((bt) => bt.tags?.name).filter(Boolean),
       reviews: (book.reviews ?? []).map((r) => ({
@@ -59,9 +45,22 @@ function transformBooks(sections) {
         rating: r.rating,
         text: r.review,
       })),
-      categories: (book.book_categories ?? []).map((bc) => bc.categories?.name).filter(Boolean)
-    })),
+      categories: (book.book_categories ?? []).map((bc) => bc.categories?.name).filter(Boolean),
+    });
+  }
+
+  // Sort sections: known order first, then anything else alphabetically
+  const knownSections = SECTION_ORDER.filter((s) => map.has(s)).map((s) => ({
+    title: s,
+    books: map.get(s),
   }));
+
+  const otherSections = [...map.keys()]
+    .filter((s) => !SECTION_ORDER.includes(s))
+    .sort()
+    .map((s) => ({ title: s, books: map.get(s) }));
+
+  return [...knownSections, ...otherSections];
 }
 
 const useBooks = () => {

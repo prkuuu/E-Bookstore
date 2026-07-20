@@ -3,30 +3,13 @@ import { useAuth } from "../../context/AuthContext";
 import useOrders from "../../hooks/useOrders";
 import { placeOrder } from "../../services/orderService";
 import BookCover from "../BookCover";
-
-const COVER_PALETTE = [
-  "#c0392b", "#2980b9", "#27ae60", "#8e44ad",
-  "#d35400", "#16a085", "#2c3e50", "#e67e22",
-];
-const deriveCover    = (id) => COVER_PALETTE[id % COVER_PALETTE.length];
-const deriveCoverUrl = (id) => {
-  const url = process.env.SUPABASE_URL;
-  if (!url || !id) return null;
-  return `${url}/storage/v1/object/public/ebookStore/${id}.webp`;
-};
-
-function deriveInitials(title) {
-  if (!title) return "?";
-  const skip = new Set(["a", "an", "the", "of", "in", "on", "at", "to", "and"]);
-  const words = title.trim().split(/\s+/).filter((w) => !skip.has(w.toLowerCase()));
-  return words.slice(0, 2).map((w) => w[0].toUpperCase()).join("") || title[0].toUpperCase();
-}
+import { deriveCover, deriveCoverUrl, deriveInitials } from "../../lib/bookUtils";
 
 // memo: only re-renders when this specific order's data or the buy-again handler changes
 const OrderCard = memo(({ order, onBuyAgain }) => {
   const book     = order.books;
   const cover    = deriveCover(book?.id ?? 0);
-  const coverUrl = deriveCoverUrl(book?.id);
+  const coverUrl = deriveCoverUrl(book?.title);
   const initials = deriveInitials(book?.title ?? "");
   const [buying, setBuying] = useState(false);
   const [done, setDone]     = useState(false);
