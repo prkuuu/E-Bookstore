@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { placeOrder } from "../../services/orderService";
+import BookCover from "../BookCover";
 
 /* ── Input style ── */
 const inp =
@@ -233,14 +234,15 @@ const PaymentPage = () => {
             {/* Purchased book cards */}
             <div className="flex gap-4 flex-wrap justify-center w-full">
               {purchasedBooks.map((book) => (
-                <div key={book.id} className="flex gap-3 w-[220px] shrink-0">
+                <div key={book.id} className="flex gap-3 w-55 shrink-0">
                   {/* Cover */}
-                  <div
-                    className="w-[88px] h-[124px] rounded-md shrink-0 flex items-center justify-center text-[11px] font-black tracking-wider text-white/90 text-center px-1 leading-tight"
-                    style={{ backgroundColor: book.cover }}
-                  >
-                    {book.initials}
-                  </div>
+                  <BookCover
+                    coverUrl={book.coverUrl}
+                    cover={book.cover}
+                    initials={book.initials}
+                    className="w-[88px] h-[124px] rounded-md shrink-0"
+                    initialsClassName="text-[11px] font-black tracking-wider text-white/90 px-1 leading-tight"
+                  />
                   {/* Info */}
                   <div className="flex flex-col gap-0.5 min-w-0 pt-0.5">
                     <h4 className="text-[13px] font-semibold text-gray-100 leading-snug">{book.title}</h4>
@@ -254,7 +256,7 @@ const PaymentPage = () => {
                     {book.tags?.length > 0 && (
                       <p className="text-[11px] mt-0.5">
                         {book.tags.slice(0, 2).map((t, i) => (
-                          <span key={t}>
+                          <span key={`${t}_${i}`}>
                             <span className="text-blue-400">{t}</span>
                             {i < Math.min(book.tags.length, 2) - 1 && <span className="text-gray-600">, </span>}
                           </span>

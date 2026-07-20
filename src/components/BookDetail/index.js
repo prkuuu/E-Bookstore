@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, memo } from "react";
 import "./index.css";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import BookCover from "../BookCover";
 
 const StarRating = ({ value, interactive = false, onChange }) => {
@@ -38,7 +39,7 @@ const RelatedCard = memo(({ book, onClick }) => (
       <p className="related-card__format">{book.format}</p>
       <p className="related-card__tags">
         {book.tags.map((t, i) => (
-          <span key={t}>
+          <span key={`${i}_${t}`}>
             <a href="#" className="link">{t}</a>
             {i < book.tags.length - 1 && <span className="muted">, </span>}
           </span>
@@ -53,10 +54,15 @@ RelatedCard.displayName = "RelatedCard";
 
 const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) => {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [cartAdded, setCartAdded] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
+
+  const wishlisted = isWishlisted(book.id);
+  const handleWishlist = useCallback(() => {
+    wishlisted ? removeFromWishlist(book.id) : addToWishlist(book);
+  }, [wishlisted, book, addToWishlist, removeFromWishlist]);
 
   // useMemo: allBooks can be large; only recompute when book.id or allBooks reference changes
   const related = useMemo(
@@ -109,7 +115,7 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) =
               <p className="detail__format">{book.format}</p>
               <p className="detail__tags">
                 {book.tags.map((t, i) => (
-                  <span key={t}>
+                  <span key={`${t}_${i}`}>
                     <a href="#" className="link">{t}</a>
                     {i < book.tags.length - 1 && <span className="muted">, </span>}
                   </span>
@@ -137,7 +143,7 @@ const BookDetail = ({ book, allBooks = [], onBack, onBookSelect, onGoToCart }) =
                 )}
                 <button
                   className={`detail__btn detail__btn--secondary ${wishlisted ? "detail__btn--wishlisted" : ""}`}
-                  onClick={() => setWishlisted((w) => !w)}
+                  onClick={handleWishlist}
                 >
                   {wishlisted ? "✓ Wishlisted" : "Add to Wishlist"} <span className="detail__btn-icon">🔖</span>
                 </button>

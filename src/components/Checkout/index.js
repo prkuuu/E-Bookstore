@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import BookCover from "../BookCover";
 
 const TAX_RATE = 0.12;
 
@@ -17,14 +18,12 @@ const CartItem = ({ item, onRemove, onQty }) => {
   return (
     <div className="bg-[#1e1e1e] border border-[#2e2e2e] rounded-xl p-4 flex gap-4 items-start">
       {/* Cover */}
-      <div
-        className="w-[120px] h-[168px] rounded-lg shrink-0 flex items-center justify-center overflow-hidden"
-        style={{ backgroundColor: book.cover }}
-      >
-        <span className="text-[18px] font-black tracking-widest text-white/90 text-center px-2 leading-tight">
-          {book.initials}
-        </span>
-      </div>
+      <BookCover
+        coverUrl={book.coverUrl}
+        cover={book.cover}
+        initials={book.initials}
+        className="w-[120px] h-[168px] rounded-lg shrink-0"
+      />
 
       {/* Info */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -39,7 +38,7 @@ const CartItem = ({ item, onRemove, onQty }) => {
         {book.tags?.length > 0 && (
           <p className="text-[12px] mt-0.5">
             {book.tags.map((t, i) => (
-              <span key={t}>
+              <span key={`${t}_${i}`}>
                 <span className="text-blue-400 cursor-pointer hover:underline">{t}</span>
                 {i < book.tags.length - 1 && <span className="text-gray-600">, </span>}
               </span>

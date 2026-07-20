@@ -6,7 +6,7 @@ import React, { useState, memo } from "react";
  *   - coverUrl is null/undefined (no image uploaded yet)
  *   - the image fails to load (wrong filename, network error)
  */
-const BookCover = memo(({ coverUrl, cover, initials, className = "", imgClassName = "" }) => {
+const BookCover = memo(({ coverUrl, cover, initials, className = "", imgClassName = "", initialsClassName = "" }) => {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -19,7 +19,7 @@ const BookCover = memo(({ coverUrl, cover, initials, className = "", imgClassNam
     >
       {/* Colour + initials fallback (visible when no image or image failed) */}
       {!showImage && (
-        <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold tracking-widest text-white/85">
+        <span className={`absolute inset-0 flex items-center justify-center text-[13px] font-bold tracking-widest text-white/85 ${initialsClassName}`}>
           {initials}
         </span>
       )}
