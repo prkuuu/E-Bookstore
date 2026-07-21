@@ -60,6 +60,7 @@ const Layout = ({ children, sidebar }) => (
 const CatalogueShell = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedBook, setSelectedBook]     = useState(null);
+  const [sidebarOpen, setSidebarOpen]       = useState(false);
   const { books, loading, error }           = useBooks();
   const navigate                            = useNavigate();
 
@@ -74,6 +75,8 @@ const CatalogueShell = () => {
         <Sidebar
           activeCategory={activeCategory}
           onSelect={handleCategorySelect}
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
         />
       }
     >
@@ -92,6 +95,7 @@ const CatalogueShell = () => {
           error={error}
           activeCategory={activeCategory}
           onBookSelect={setSelectedBook}
+          onOpenCategories={() => setSidebarOpen(true)}
         />
       )}
     </Layout>

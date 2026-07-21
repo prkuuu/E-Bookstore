@@ -148,11 +148,11 @@ const CheckoutPage = () => {
         {/* Title */}
         <h1 className="text-[20px] font-bold text-gray-100">Shopping Cart</h1>
 
-        {/* ── Cart items: horizontal scroll row ── */}
+        {/* ── Cart items: horizontal scroll on md+, stacked on mobile ── */}
         <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-4">
-          <div className="flex gap-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 sm:overflow-x-auto sm:pb-1 sm:[&::-webkit-scrollbar]:h-1 sm:[&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] sm:[&::-webkit-scrollbar-thumb]:rounded-full">
             {items.map((item) => (
-              <div key={item.book.id} className="shrink-0 w-[340px]">
+              <div key={item.book.id} className="w-full sm:shrink-0 sm:w-[320px]">
                 <CartItem item={item} onRemove={removeFromCart} onQty={updateQty} />
               </div>
             ))}
@@ -160,11 +160,11 @@ const CheckoutPage = () => {
         </div>
 
         {/* ── Address + Summary row ── */}
-        <div className="flex gap-4 items-start max-lg:flex-col">
+        <div className="flex gap-4 items-start flex-col lg:flex-row">
 
           {/* Address — left */}
-          <div className="flex-1 min-w-0 bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0 w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl p-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-[15px] font-semibold text-gray-100">Address</h2>
               <label className="flex items-center gap-1.5 text-[12px] text-gray-400 cursor-pointer">
                 <input type="checkbox" checked={useSaved} onChange={(e) => setUseSaved(e.target.checked)} className="accent-blue-500" />
@@ -172,7 +172,7 @@ const CheckoutPage = () => {
               </label>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {/* Row 1 */}
               <div className="flex flex-col gap-1">
                 <label className="text-[11px] text-gray-400">First Name</label>
@@ -188,7 +188,7 @@ const CheckoutPage = () => {
               </div>
 
               {/* Row 2 */}
-              <div className="flex flex-col gap-1 col-span-3 max-sm:col-span-1">
+              <div className="flex flex-col gap-1 sm:col-span-2 md:col-span-3">
                 <label className="text-[11px] text-gray-400">e-mail</label>
                 <input className={inputClass} type="email" placeholder="e-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
@@ -228,7 +228,7 @@ const CheckoutPage = () => {
           </div>
 
           {/* Grand Total — right */}
-          <div className="w-72 max-lg:w-full shrink-0 bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl overflow-hidden flex flex-col">
+          <div className="w-full lg:w-72 shrink-0 bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl overflow-hidden flex flex-col">
 
             {/* Illustration */}
             <div className="h-[130px] bg-[#1e3a5f] flex items-center justify-center overflow-hidden relative">
