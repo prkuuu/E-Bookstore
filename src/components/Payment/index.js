@@ -33,7 +33,7 @@ const CardForm = ({ placing, onPay }) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div className="flex flex-col gap-1">
         <label className="text-[11px] text-gray-400">Card Number</label>
         <input className={inp} placeholder="XXXX-XXXX-XXXX-XXXX" value={number}
@@ -294,18 +294,34 @@ const PaymentPage = () => {
         <div className="bg-[#1e1e1e]/95 backdrop-blur-sm border border-[#3a3a3a] rounded-xl overflow-hidden shadow-2xl w-full max-w-[580px]">
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#2e2e2e]">
-            <h2 className="text-[16px] font-semibold text-gray-100">Complete Payment</h2>
-            <span className="text-[15px] font-bold text-gray-100">
-              Payable Amount: &#8377;{payableAmount.toLocaleString("en-IN")}
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-[#2e2e2e] flex-wrap gap-2">
+            <h2 className="text-[15px] sm:text-[16px] font-semibold text-gray-100">Complete Payment</h2>
+            <span className="text-[13px] sm:text-[15px] font-bold text-gray-100">
+              &#8377;{payableAmount.toLocaleString("en-IN")}
             </span>
           </div>
 
-          {/* Body: tab sidebar + form */}
-          <div className="flex min-h-[220px]">
+          {/* Body: tab sidebar (desktop) / tab row (mobile) + form */}
+          <div className="flex flex-col sm:flex-row min-h-[220px]">
 
-            {/* Tab sidebar */}
-            <div className="w-[140px] shrink-0 border-r border-[#2e2e2e] flex flex-col">
+            {/* Mobile: horizontal tab row */}
+            <div className="sm:hidden flex border-b border-[#2e2e2e] overflow-x-auto [&::-webkit-scrollbar]:h-0">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`shrink-0 px-4 py-2.5 text-[12px] border-none cursor-pointer transition-colors border-b-2 whitespace-nowrap
+                    ${activeTab === tab.id
+                      ? "bg-[#262626] text-white border-b-blue-500 font-semibold"
+                      : "bg-transparent text-gray-400 border-b-transparent hover:bg-[#262626] hover:text-gray-200"}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Desktop: vertical tab sidebar */}
+            <div className="hidden sm:flex w-35 shrink-0 border-r border-[#2e2e2e] flex-col">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -321,7 +337,7 @@ const PaymentPage = () => {
             </div>
 
             {/* Form area */}
-            <div className="flex-1 p-5">
+            <div className="flex-1 p-4 sm:p-5">
               {error && (
                 <p className="text-[12px] text-red-400 bg-red-500/10 border border-red-500/20 rounded px-3 py-2 mb-3">{error}</p>
               )}

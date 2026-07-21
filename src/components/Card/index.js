@@ -6,7 +6,7 @@ const BookCard = memo(({ book, onClick }) => {
 
   return (
     <div
-      className={`flex gap-3 bg-[#262626] border border-[#3a3a3a] rounded-md p-3 w-60 shrink-0 transition-colors duration-150 hover:border-[#555] ${onClick ? "cursor-pointer" : "cursor-default"}`}
+      className={`flex gap-3 bg-[#262626] border border-[#3a3a3a] rounded-md p-3 w-full transition-colors duration-150 hover:border-[#555] ${onClick ? "cursor-pointer" : "cursor-default"}`}
       role="button"
       onClick={onClick}
     >
