@@ -43,13 +43,13 @@ const Header = ({ onMenuOpen }) => {
 
   return (
     <>
-      <header className="flex items-center justify-between bg-[#161616] px-4 sm:px-6 h-14 border-b border-[#3e3e3e] sticky top-0 z-50 gap-4 shrink-0">
+      <header className="flex items-center bg-[#161616] px-4 sm:px-6 h-14 border-b border-[#3e3e3e] sticky top-0 z-50 gap-4 shrink-0">
 
-        {/* ── Hamburger (mobile only) ── */}
+        {/* ── Hamburger (mobile + tablet, below md) ── */}
         <button
           aria-label="Toggle navigation"
           onClick={() => setMobileNav((v) => !v)}
-          className="sm:hidden flex flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer p-1 shrink-0"
+          className="md:hidden flex flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer p-1 shrink-0"
         >
           <span className={`block h-[2px] w-5 bg-gray-300 transition-all duration-200 origin-center ${mobileNav ? "rotate-45 translate-y-[7px]" : ""}`} />
           <span className={`block h-[2px] w-5 bg-gray-300 transition-all duration-200 ${mobileNav ? "opacity-0 scale-x-0" : ""}`} />
@@ -59,13 +59,13 @@ const Header = ({ onMenuOpen }) => {
         {/* ── Logo ── */}
         <NavLink to="/" className="flex items-center gap-2.5 shrink-0 no-underline">
           <span className="text-[22px] text-white">&#9783;</span>
-          <span className="text-[18px] font-bold text-white tracking-tight whitespace-nowrap sm:text-base">
+          <span className="text-[18px] font-bold text-white tracking-tight whitespace-nowrap">
             Book Worm
           </span>
         </NavLink>
 
-        {/* ── Nav Links (desktop) ── */}
-        <nav className="hidden sm:flex items-center gap-1 shrink-0">
+        {/* ── Nav Links — left-aligned, right next to logo ── */}
+        <nav className="hidden md:flex items-center gap-1">
           <button
             onClick={handleOrdersClick}
             onMouseEnter={prefetch.orders}
@@ -81,8 +81,11 @@ const Header = ({ onMenuOpen }) => {
           </NavLink>
         </nav>
 
+        {/* ── Spacer: pushes icons to the far right ── */}
+        <div className="flex-1" />
+
         {/* ── Right: Icons ── */}
-        <div className="flex items-center gap-2 flex-1 sm:flex-none justify-end relative">
+        <div className="flex items-center gap-2 relative">
 
           {/* Cart */}
           <button
@@ -145,10 +148,10 @@ const Header = ({ onMenuOpen }) => {
         </div>
       </header>
 
-      {/* ── Mobile Nav Drawer ── */}
+      {/* ── Mobile/tablet Nav Drawer (below md) ── */}
       {mobileNav && (
-        <div className="sm:hidden fixed top-14 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-[#3e3e3e] shadow-lg">
-          <nav ref={mobileNavRef} className="flex flex-col px-4 py-3 gap-1">
+        <div className="md:hidden fixed top-14 left-0 right-0 z-40 bg-[#1a1a1a] border-b border-[#3e3e3e] shadow-lg">
+          <nav ref={mobileNavRef} className="flex flex-col px-4 py-3 gap-1 max-h-[calc(100vh-56px)] overflow-y-auto">
             <button
               onClick={handleOrdersClick}
               className={`text-left text-[14px] font-medium px-3.5 py-2.5 rounded-md transition-colors cursor-pointer border-none
