@@ -39,14 +39,14 @@ const Sidebar = memo(({ activeCategory, onSelect, mobileOpen, onMobileClose }) =
 
   return (
     <>
-      {/* ── Desktop sidebar (hidden on mobile) ── */}
-      <aside className="hidden sm:block w-47.5 shrink-0 bg-[#1c1c1c] border-r border-[#2a2a2a] h-[calc(100vh-56px)] overflow-y-auto sticky top-14 py-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
+      {/* ── Desktop sidebar (visible from md / 768 px up) ── */}
+      <aside className="hidden md:block w-48 shrink-0 bg-[#1c1c1c] border-r border-[#2a2a2a] h-[calc(100vh-56px)] overflow-y-auto sticky top-14 py-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
         {list}
       </aside>
 
-      {/* ── Mobile slide-in overlay ── */}
+      {/* ── Mobile/tablet slide-in overlay (below md) ── */}
       {mobileOpen && (
-        <div className="sm:hidden fixed inset-0 z-40 flex">
+        <div className="md:hidden fixed inset-0 z-40 flex">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60"

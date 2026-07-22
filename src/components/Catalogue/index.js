@@ -118,8 +118,8 @@ const BookCatalogue = ({ books, loading, error, activeCategory, onBookSelect, on
   return (
     <section className="flex-1 flex flex-col bg-[#161616] overflow-y-auto h-[calc(100vh-56px)] [&::-webkit-scrollbar]:w-1.25 [&::-webkit-scrollbar-thumb]:bg-[#3a3a3a] [&::-webkit-scrollbar-thumb]:rounded-full">
 
-      {/* ── Mobile toolbar: Categories + Filters toggles ── */}
-      <div className="sm:hidden flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border-b border-[#2a2a2a] sticky top-0 z-10">
+      {/* ── Mobile/tablet toolbar: Categories + Filters toggles (below md) ── */}
+      <div className="md:hidden flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border-b border-[#2a2a2a] sticky top-0 z-10">
         {/* Categories button */}
         <button
           onClick={onOpenCategories}
@@ -164,9 +164,9 @@ const BookCatalogue = ({ books, loading, error, activeCategory, onBookSelect, on
         </div>
       </div>
 
-      {/* ── Mobile collapsible filter panel ── */}
+      {/* ── Mobile/tablet collapsible filter panel (below md) ── */}
       {filtersOpen && (
-        <div className="sm:hidden bg-[#1a1a1a] border-b border-[#2a2a2a] px-3 py-3 grid grid-cols-2 gap-2 sticky top-[44px] z-10">
+        <div className="md:hidden bg-[#1a1a1a] border-b border-[#2a2a2a] px-3 py-3 grid grid-cols-2 gap-2 sticky top-[44px] z-10">
           {/* Language */}
           <div className="flex flex-col gap-1">
             <label className="text-[11px] text-gray-400">Language</label>
@@ -237,8 +237,8 @@ const BookCatalogue = ({ books, loading, error, activeCategory, onBookSelect, on
         </div>
       )}
 
-      {/* ── Desktop Filter / Search Bar ── */}
-      <div className="hidden sm:flex items-stretch gap-3 px-5 py-3 bg-[#161616] sticky top-0 z-10 flex-nowrap">
+      {/* ── Desktop Filter / Search Bar (md / 768 px and up) ── */}
+      <div className="hidden md:flex items-stretch gap-3 px-5 py-3 bg-[#161616] sticky top-0 z-10 flex-nowrap">
 
         {/* Search */}
         <FilterGroup label="Search you want to read here" grow>
